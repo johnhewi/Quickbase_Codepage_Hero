@@ -11,3 +11,6 @@ const your_client_object = new client(user_token, realm_url)
 ```
 You can use two additional optional parameters. numberOfAttempts and timout. NumberOfAttempts is how many additional attempts will be made if a post results in a 429 error, "Too Many Requests." Timeout is how many milliseconds the application will wait before attempting again. These are both set to 0 by default. 
 
+```javascript
+const our_client_object = new client(user_token, realm_url, numberOfAttempts, timeout)
+```
