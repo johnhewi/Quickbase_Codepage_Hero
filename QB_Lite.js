@@ -336,6 +336,8 @@ class client {
 
 }//end class
 
+
+//helper function to build query strings
 function queryStringBuilder(searchfield, argument, operator, keyArray){
 
     let queries = []
