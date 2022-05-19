@@ -9,7 +9,7 @@
 //timeout: How long you want to wait in milliseconds between attempts if Quickbase returns a 429 code (too many requests) (integer)
 
 class client {
-    constructor(userToken, realm, numberOfAttempts=3, timeout=1000) {
+    constructor(userToken, realm, numberOfAttempts=0, timeout=0) {
         this.headers = {
             "QB-Realm-Hostname": realm,
             'Content-Type': 'application/json',
@@ -19,8 +19,6 @@ class client {
         this.numberOfAttempts = numberOfAttempts
         this.timeout = timeout
 
-        console.log("numberOfAttempts: ", numberOfAttempts)
-        console.log("timeout: ", timeout)
     }//end constructor
 
     //METHODS:
@@ -151,6 +149,9 @@ class client {
     //table_id: the table id (string)
     //record_array: an array of record objects (each containing field objects)
 
+    //RETURNS
+    //a dictionary of arrays of the RID's that have been created, unchanged and edited
+
 
     async post(table_id, record_array){
         const data = {
@@ -178,7 +179,13 @@ class client {
 
         if(response.status===200) {
             let data = await response.json()
-            return data.metadata.createdRecordIds
+
+            return {
+                createdRecordIds: data.metadata.createdRecordIds,
+                unchangedRecordIds: data.metadata.unchangedRecordIds,
+                updatedRecordIds: data.metadata.updatedRecordIds
+            }
+
         }else{
             console.log("Error creating records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
         }
