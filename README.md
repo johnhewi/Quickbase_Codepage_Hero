@@ -1,7 +1,7 @@
 # QB_Lite
 JavaScript Tools for Quickbase
 
-These are some tools for the [Quickbase API](https://developer.quickbase.com/).
+These are some basic tools for the [Quickbase API](https://developer.quickbase.com/).
 
 ## to include these tools in your web project:
 
