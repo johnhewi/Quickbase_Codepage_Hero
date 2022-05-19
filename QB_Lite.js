@@ -39,7 +39,7 @@ class client {
         const body = {
             "from": table,
             "select": selectArray,
-            "where": `{${query}}`
+            "where": `${query}`
         };
 
         let response = {};

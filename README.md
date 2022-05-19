@@ -35,7 +35,7 @@ This would create a client object with the given user token and realm, would mak
 
 ## query method
 
-This is the method for querying Quickbase. It takes as parameters the table ID(str), the query in [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html) (str), (do not include the curly braces) and an array of the field id's (int) that you want in the returned record objects. It returns the found record objects. 
+This is the method for querying Quickbase. It takes as parameters the table ID(str), the query in [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html) (str), and an array of the field id's (int) that you want in the returned record objects. It returns the found record objects. 
 
 ```javascript
 client_object.query(table_id, query, array) 
@@ -43,7 +43,7 @@ client_object.query(table_id, query, array)
 ### query method example:
 
 ```javascript
-let returned_records = client_object.query("bfa42nsiwn", "3.GT.0", [3,5,7])
+let returned_records = client_object.query("bfa42nsiwn", "{3.GT.0}", [3,5,7])
 ```
 This would return all the records in the table with table ID "bfa42nsiwn" where field ID 3 is greater than 0. (this would return all the records in the table.) The fields returned would be 3, 5, 7. The records will be returned as an array of dictionary objects. The keys are the field ID numbers and the values are themselves a dictionary, with a key named "value" to access the returned value:
 
