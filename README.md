@@ -105,4 +105,12 @@ let records_created = client_object.post("bfa42nsiwn", records_to_create)
 
 ```
 
-This creates the records in the array records_to_create in table "bfa42nsiwn".
+This creates the records in the array records_to_create in table "bfa42nsiwn". In this example, the two records created have RID's 41 and 42, and the returned dictionary would be: 
+
+```javascript
+{
+  createdRecordIds: [41, 42]
+  unchangedRecordIds: []
+  updatedRecordIds: []
+}
+```
