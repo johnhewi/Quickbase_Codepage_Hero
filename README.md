@@ -35,7 +35,7 @@ This would create a client object with the given user token and realm, would mak
 
 ## query method
 
-This is the method for querying Quickbase. It takes as parameters the table ID(str), the query in [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html)(str), and an array of the field id's (int) that you want in the returned record objects. It returns the found record objects. 
+This is the method for querying Quickbase. It takes as parameters the table ID(str), the query in [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html) (str), and an array of the field id's (int) that you want in the returned record objects. It returns the found record objects. 
 
 ```javascript
 client_object.query(table_id, query, array) 
