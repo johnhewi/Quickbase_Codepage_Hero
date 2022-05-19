@@ -25,7 +25,7 @@ You can use two additional optional parameters. numberOfAttempts(int) and timout
 ```javascript
 const client_object = new client(user_token, realm_url, numberOfAttempts, timeout)
 ```
-### example:
+### client object example:
 ```javascript
 const client_object = new client("dyym73_iiu7_9_2ywlpz9s425us1l09qf2ubjpee", "myrealm.quickbase.com", 3, 1000)
 ```
@@ -40,7 +40,7 @@ This is the method for querying Quickbase. It takes as parameters the table ID(s
 ```javascript
 client_object.query(table_id, query, array) 
 ```
-### example:
+### query method example:
 
 ```javascript
 let returned_records = client_object.query("bfa42nsiwn", "3.GT.0", [3,5,7])
@@ -66,7 +66,7 @@ This allows you to search for records matching multiple values. It takes as para
 client_object.multiquery(table_id, searchfield, queryArray, selectArray)
 ```
 
-### example:
+### multiquery method example:
 
 ```javascript
 let returned_records = client_object.multiquery("bfa42nsiwn", 6, ["Tacoma", "4Runner", "Corolla"], [3, 6, 9])
@@ -86,7 +86,7 @@ It takes as parameters the table ID (str) and an array of record objects you wis
 client_object.post(table_id, record_array)
 ```
 
-### example:
+### post method example:
 
 ```javascript
 let records_to_create = 
