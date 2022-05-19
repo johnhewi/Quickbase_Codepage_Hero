@@ -18,7 +18,8 @@ const our_client_object = new client(user_token, realm_url, numberOfAttempts, ti
 ```
 ### example:
 ```javascript
-const qb_client = new client("dyym73_iiu7_9_2ywlpz9s425us1l09qf2ubjpee", "myrealm.quickbase.com", 3, 1000)
+const qb_client = new client("dyym73_iiu7_9_2ywlpz9s425us1l09qf2ubjpee", "myrealm.quickbase.com", 
+    3, 1000)
 ```
 This would create a client object with the given user token and realm, would make 3 additional attempts if it gets a 429 error (and stop attempting once it gets a 200 success) and wait 1000 milliseconds (1 second) between attempts.
 
