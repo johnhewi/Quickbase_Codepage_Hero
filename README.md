@@ -72,7 +72,7 @@ client_object.multiquery(table_id, searchfield, queryArray, selectArray)
 let returned_records = client_object.multiquery("bfa42nsiwn", 6, ["Tacoma", "4Runner", "Corolla"], [3, 6, 9])
 ```
 
-This would return all records from table with table ID "bfa42nsiwn" where field ID 6 matches any of the following: "Tacoma", "4Runner or "Corolla". The fields returned in each record would be 3, 6 and 9. 
+This would return all records from table with table ID "bfa42nsiwn" where field ID 6 matches any of the following: "Tacoma", "4Runner" or "Corolla". The fields returned in each record would be 3, 6 and 9. 
 
 
 
