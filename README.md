@@ -78,7 +78,7 @@ This would return all records from table with table ID "bfa42nsiwn" where field 
 
 ## post method
 
-This method allows you to either create or edit records. If the key field is given and exists in the table, that record will be updated. If key field is not given, a record will be created. If the key field is given but does not exist in the table, a record will be created with the given key field value. 
+This method allows you to either create or edit records. If the key field is given and exists in the table, that record will be updated. If key field is not given, a record will be created. If the key field is given but does not exist in the table, a record will be created with the given key field value. (unless the key field is the default Record ID, field #3, in which case Quickbase will return an error)
 
 It takes as parameters the table ID (str) and an array of record objects you wish to create or edit. It returns a dictionary of arrays of the RID's of the records created, unchanged and edited.  
 
