@@ -3,7 +3,7 @@ JavaScript Tools for Quickbase
 
 These are some basic tools for the [Quickbase API](https://developer.quickbase.com/).
 
-## to include these tools in your web project:
+## to use these tools in your web project:
 
 Simply include the following in your .html file:
 ```html
