@@ -105,4 +105,4 @@ let records_created = client_object.post("bfa42nsiwn", records_to_create)
 
 ```
 
-This creates the two records in table "bfa42nsiwn".
+This creates the records in the array records_to_create in table "bfa42nsiwn".
