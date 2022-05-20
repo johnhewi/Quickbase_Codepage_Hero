@@ -62,7 +62,7 @@ class client {
 
         if(response.status===200) {
             let data = await response.json()
-            return data['data']
+            return await data['data']
         }else{
             console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
         }
@@ -136,7 +136,7 @@ class client {
                 console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
             }
         }
-        return datareturn
+        return datareturn;
     }
 
     //POST
@@ -229,7 +229,7 @@ class client {
 
         if(response.status===200){
             let data = await response.json()
-            return data['numberDeleted']
+            return await data['numberDeleted']
         }else{
             console.log("Error deleting records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
         }
@@ -299,6 +299,7 @@ class client {
 
             }else{
                 console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+                return
             }
         }
         return number_deleted
@@ -308,7 +309,8 @@ class client {
     //get all the options of a multiple choice field
 
     //PARAMETERS:
-    //
+    //table_id(str) 
+    //FID (int)
 
     async getchoices(table_id, field_id){
 
@@ -333,7 +335,7 @@ class client {
 
         if(response.status===200){
             let data = await response.json()
-            return data['properties']['choices']
+            return await data['properties']['choices']
         }else{
             console.log("Error querying for field choices. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
         }
@@ -345,13 +347,19 @@ class client {
 
 
 //helper function to build query strings
-function queryStringBuilder(searchfield, argument, operator, keyArray){
+function queryStringBuilder(searchfield, argument, operator, valueArray){
 
     let queries = []
 
-    for(let i = 0; i < keyArray.length; i++){
-        let query = "{" + searchfield + "." + argument + "." + keyArray[i] + "}"
-        queries.push(query)
+    for(let i = 0; i < valueArray.length; i++){
+        if(typeof valueArray[i] === "string" || valueArray[i] instanceof String){
+            let query = "{" + searchfield + "." + argument + ".\'" + valueArray[i] + "\'}"
+            queries.push(query)
+        }else{
+            let query = "{" + searchfield + "." + argument + "." + valueArray[i] + "}"
+            queries.push(query)
+        }
+
     }
 
     return queries.join(operator)
