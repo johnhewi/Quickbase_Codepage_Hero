@@ -148,7 +148,7 @@ This method allows you to get the options for a multiple choice field. It takes 
 client_object.getchoices(table_id, field_id)
 ```
 
-## Getchoices Method Example:
+### Getchoices Method Example:
 ```javascript
 let choices = client_object.getchoices("bfa42nsiwn", 8)
 ```
