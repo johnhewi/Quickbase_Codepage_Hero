@@ -7,7 +7,7 @@ These are some basic tools for the [Quickbase API](https://developer.quickbase.c
 
 Simply include the following in your .html file:
 ```html
-<script src=https://cdn.jsdelivr.net/gh/johnhewi/QB_Lite@0461b7381207065562ca1945763b59f10c7dd323/QB_Lite.js></script>
+<script src=https://cdn.jsdelivr.net/gh/johnhewi/QB_Lite@d2ee6a4fbd224b64ca1d5b6cef0ad7da950c6ed7/QB_Lite.js></script>
 ```
 
 
@@ -161,7 +161,7 @@ choices = [
 ]
 ```
 
-##QueryStringBuilder Function:
+## QueryStringBuilder Function:
 This function allows you to build a compound query string for use in the [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html). It takes as parameters the field you wish to search(int), a Quickbase Query Language argument such as "EX" or "GT"(str), a logical operator like "AND" or "OR"(str) and an array of values(str or num) to include in the query. If the value in the array is a string, the function will automatically put single quotes around it. It returns a query string.
 ```javascript
 queryStringBuilder(searchfield, argument, operator, valueArray)
