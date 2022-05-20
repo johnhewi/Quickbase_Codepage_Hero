@@ -3,7 +3,7 @@ JavaScript Tools for Quickbase
 
 These are some basic tools for the [Quickbase API](https://developer.quickbase.com/).
 
-## to use these tools in your web project:
+## To use these tools in your web project:
 
 Simply include the following in your .html file:
 ```html
@@ -12,7 +12,7 @@ Simply include the following in your .html file:
 
 
 
-## client object:
+## Client Object:
 
 Use a user token (str) and realm url (str) to instantiate a client object:
 
@@ -25,7 +25,7 @@ You can use two additional optional parameters. numberOfAttempts(int) and timout
 ```javascript
 const client_object = new client(user_token, realm_url, numberOfAttempts, timeout)
 ```
-### client object example:
+### Client Object Example:
 ```javascript
 const client_object = new client("dyym73_iiu7_9_2ywlpz9s425us1l09qf2ubjpee", "myrealm.quickbase.com", 3, 1000)
 ```
@@ -33,14 +33,14 @@ This would create a client object with the given user token and realm, would mak
 
 
 
-## query method
+## Query Method:
 
 This is the method for querying Quickbase. It takes as parameters the table ID(str), the query in [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html) (str), and an array of the field id's (int) that you want in the returned record objects. It returns the found record objects. 
 
 ```javascript
 client_object.query(table_id, query, array) 
 ```
-### query method example:
+### Query Method Example::
 
 ```javascript
 let returned_records = client_object.query("bfa42nsiwn", "{3.GT.0}", [3,5,7])
@@ -58,15 +58,15 @@ This would return all the records in the table with table ID "bfa42nsiwn" where 
 
 
 
-## multiquery method:
+## Multiquery Example:
 
-This allows you to search for records matching multiple values. It takes as parameters the table ID (str), the field ID number (int) of the field you want to search, an array of values you are searching for (number or str), and an array of the field ID numbers you want returned for each record(int) It returns an array of record objects. 
+This allows you to search for records matching any of an array of values. It takes as parameters the table ID (str), the field ID number (int) of the field you want to search, an array of values you are searching for (number or str), and an array of the field ID numbers you want returned for each record(int) It returns an array of record objects. 
 
 ```javascript
 client_object.multiquery(table_id, searchfield, queryArray, selectArray)
 ```
 
-### multiquery method example:
+### Multiquery Method Example:
 
 ```javascript
 let returned_records = client_object.multiquery("bfa42nsiwn", 6, ["Tacoma", "4Runner", "Corolla"], [3, 6, 9])
@@ -76,7 +76,7 @@ This would return all records from table with table ID "bfa42nsiwn" where field 
 
 
 
-## post method
+## Post Method
 
 This method allows you to either create or edit records. If the key field is given and exists in the table, that record will be updated. If key field is not given, a record will be created. If the key field is given but does not exist in the table, a record will be created with the given key field value. (unless the key field is the default Record ID, field #3, in which case Quickbase will return an error)
 
@@ -86,7 +86,7 @@ It takes as parameters the table ID (str) and an array of record objects you wis
 client_object.post(table_id, record_array)
 ```
 
-### post method example:
+### Post Method Example:
 
 ```javascript
 let records_to_create = 
@@ -113,4 +113,66 @@ This creates the records in the array records_to_create in table "bfa42nsiwn". I
   unchangedRecordIds: []
   updatedRecordIds: []
 }
+```
+
+
+## Delete Method
+This method allows you to delete records that satisfy a query in [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html). 
+It takes as parameters the table ID (str) the query (str) and returns the total number of records deleted.(int)
+```javascript
+client_object.delete(table_id, query)
+```
+### Delete Method Example:
+```javascript
+let number_of_records_deleted = client_object.delete("bfa42nsiwn", "{6.EX.'Wrangler'}")
+```
+This would delete all records in table "bfa42nsiwn" where field ID 6 matches "Corolla". If only one record was deleted, it would return a value of 1.
+
+
+
+## Multidelete Method
+This method allows you to delete records matching any of an array of values. It takes as parameters the table ID (str), the field ID number (int) of the field you want to search and an array of values you are searching for (number or str). It returns the total number of records deleted.(int)
+```javascript
+client_object.multidelete(table_id, field_id, value_array)
+```
+
+### Multidelete Method Example:
+```javascript
+let number_of_records_deleted = client_object.multidelete("bfa42nsiwn", 6, ["Expedition", "Pinto", "Yukon"])
+```
+This would delete any records in table "bfa42nsiwn" where field ID 6 matches any of the following: "Expedition", "Pinto" or "Yukon". If 3 records were deleted, it would return a value of 3.
+
+## Getchoices Method
+This method allows you to get the options for a multiple choice field. It takes as parameters the table ID (str) and a field ID number (int). It returns an array of the options for the multiple choice field.
+```javascript
+client_object.getchoices(table_id, field_id)
+```
+
+## Getchoices Method Example:
+```javascript
+let choices = client_object.getchoices("bfa42nsiwn", 8)
+```
+This would return an array of the options for field ID 8 in table "bfa42nsiwn". If the multiple choice options in that field were "Toyota," "Lexus" and "Land Cruiser," it would return the following array:
+```javascript
+choices = [
+  "Toyota",
+  "Lexus",
+  "Land Cruiser"
+]
+```
+
+##QueryStringBuilder Function:
+This function allows you to build a compound query string for use in the [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html). It takes as parameters the field you wish to search(int), a Quickbase Query Language argument such as "EX" or "GT"(str), a logical operator like "AND" or "OR"(str) and an array of values(str or num) to include in the query. If the value in the array is a string, the function will automatically put single quotes around it. It returns a query string.
+```javascript
+queryStringBuilder(searchfield, argument, operator, valueArray)
+```
+
+### QueryStringBuilder Function Example:
+```javascript
+let query = client_object.queryStringBuilder(8, "XEX", "AND", ["Ford", "Ram", "GMC"])
+```
+This would return the query string: 
+
+```html
+{8.XEX'Ford'}AND{8.XEX'Ram'}AND{8.XEX'GMC'}
 ```
