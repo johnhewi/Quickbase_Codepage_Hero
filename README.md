@@ -58,7 +58,7 @@ This would return all the records in the table with table ID "bfa42nsiwn" where 
 
 
 
-## Multiquery Example:
+## Multiquery Method:
 
 This allows you to search for records matching any of an array of values. It takes as parameters the table ID (str), the field ID number (int) of the field you want to search, an array of values you are searching for (number or str), and an array of the field ID numbers you want returned for each record(int) It returns an array of record objects. 
 
