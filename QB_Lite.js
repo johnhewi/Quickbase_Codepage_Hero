@@ -206,7 +206,7 @@ class client {
     async delete(table_id, query){
         const body = {
             "from": table_id,
-            "where": `{${query}}`
+            "where": `${query}`
         };
 
         let response = {};
