@@ -65,6 +65,7 @@ class client {
             return await data['data']
         }else{
             console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+            console.log("response: ", response)
         }
     }
 
@@ -134,6 +135,7 @@ class client {
                 datareturn.push(data['data'])
             }else{
                 console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+                console.log("response: ", response)
             }
         }
         return datareturn;
@@ -188,6 +190,7 @@ class client {
 
         }else{
             console.log("Error creating records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+            console.log("response: ", response)
         }
     }
 
@@ -232,6 +235,7 @@ class client {
             return await data['numberDeleted']
         }else{
             console.log("Error deleting records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+            console.log("response: ", response)
         }
     }
 
@@ -299,6 +303,7 @@ class client {
 
             }else{
                 console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+                console.log("response: ", response)
                 return
             }
         }
@@ -338,6 +343,7 @@ class client {
             return await data['properties']['choices']
         }else{
             console.log("Error querying for field choices. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+            console.log("response: ", response)
         }
 
     }
