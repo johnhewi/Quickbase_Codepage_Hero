@@ -342,6 +342,7 @@ class client {
             let data = await response.json()
             return await data['properties']['choices']
         }else{
+            //give error to user
             console.log("Error querying for field choices. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
             console.log("response: ", response)
         }
