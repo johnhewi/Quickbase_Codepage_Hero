@@ -155,7 +155,7 @@ class client {
     //a dictionary of arrays of the RID's that have been created, unchanged and edited
 
 
-    async post(table_id, record_array){
+    async post(table_id, record_array) {
         const data = {
             to: table_id,
             data: record_array
@@ -165,7 +165,7 @@ class client {
         response.status = 429
         let attemptCounter = 0
 
-        while(response.status === 429 && attemptCounter<=this.numberOfAttempts) {
+        while (response.status === 429 && attemptCounter <= this.numberOfAttempts) {
 
             response = await fetch('https://api.quickbase.com/v1/records', {
                 method: 'POST',
@@ -179,7 +179,7 @@ class client {
             }
         }
 
-        if(response.status===200) {
+        if (response.status === 200) {
             let data = await response.json()
 
             return {
@@ -188,10 +188,25 @@ class client {
                 updatedRecordIds: data.metadata.updatedRecordIds
             }
 
-        }else{
-            console.log("Error creating records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
-            console.log("response: ", response.json())
+        } else {
+            let data = await response.json()
+            console.log("Error creating records. Quickbase error code: " + response.status + ". Error message: \"" + response.statusText + "\"")
+            console.log("response: ", data)
+            if ('metadata' in data) {
+                if ('lineErrors' in data['metadata']) {
+                    let dict = data['metadata']['lineErrors']
+                    for ( const [key] of Object.entries(dict)) {
+                            console.log("Line errors from posting Record #", key, ":")
+                            for (let i = 0; i < data['metadata']['lineErrors'][key].length; i++) {
+                                console.log(data['metadata']['lineErrors'][key][i])
+                            }
+
+                    }
+                }
+            }
+
         }
+
     }
 
 
