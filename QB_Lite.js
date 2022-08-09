@@ -61,14 +61,11 @@ class client {
         }
 
         if(response.status===200) {
-        if(response.status===200)
             let data = await response.json()
             return await data['data']
         }else{
             console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
-
             console.log("response: ", response.json())
-
         }
     }
 
@@ -193,13 +190,6 @@ class client {
 
         }else{
             console.log("Error creating records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
-            let data = response.json()
-            if( data['metadata']['lineErrors'].length > 0){
-                console.log("Line Errors:")
-                for (let i = 0; i < data['metadata']['lineErrors'].length; i++){
-                    console.log(data['metadata']['lineErrors'][i])
-                }
-            }
             console.log("response: ", response.json())
         }
     }
