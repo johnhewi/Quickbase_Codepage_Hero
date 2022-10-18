@@ -139,7 +139,8 @@ client_object.multidelete(table_id, field_id, value_array)
 
 ### Multidelete Method Example:
 ```javascript
-let number_of_records_deleted = client_object.multidelete("bfa42nsiwn", 6, ["Expedition", "Pinto", "Yukon"])
+let number_of_records_deleted = client_object.multidelete("bfa42nsiwn", 6, 
+["Expedition", "Pinto", "Yukon"])
 ```
 This would delete any records in table "bfa42nsiwn" where field ID 6 matches any of the following: "Expedition", "Pinto" or "Yukon". If 3 records were deleted, it would return a value of 3.
 
