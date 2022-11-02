@@ -387,6 +387,22 @@ function queryStringBuilder(searchfield, argument, operator, valueArray){
     return queries.join(operator)
 }
 
+function dynamicallyLoadScript(url) {
+    var script = document.createElement("script");  // create a script DOM node
+    script.src = url;  // set its src to the provided URL
 
+    document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+}
 
+dynamicallyLoadScript("https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js")
+
+async function create_pdf_b64(opt){
+    const element = document.querySelector('body');
+    const worker = html2pdf().set(opt).from(element);
+    var pdf_object
+    await worker.outputPdf('datauristring').then(function (pdfAsString) {
+        pdf_object = pdfAsString
+    });
+    return pdf_object.split('base64,')[1]
+}
 
