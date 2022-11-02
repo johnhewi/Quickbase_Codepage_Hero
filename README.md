@@ -179,7 +179,7 @@ This would return the query string:
 {8.XEX'Ford'}AND{8.XEX'Ram'}AND{8.XEX'GMC'}
 ```
 
-## create_pdf_b64 Function:
+## Create PDF B64 Function:
 This function takes a dictionary object containing the pdf rendering options and returns a base64 encoded pdf of the currently loaded page. (Quickbase requires uploaded files to be base64 encoded.)
 
 
