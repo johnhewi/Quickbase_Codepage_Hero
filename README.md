@@ -139,7 +139,8 @@ client_object.multidelete(table_id, field_id, value_array)
 
 ### Multidelete Method Example:
 ```javascript
-let number_of_records_deleted = client_object.multidelete("bfa42nsiwn", 6, ["Expedition", "Pinto", "Yukon"])
+let number_of_records_deleted = client_object.multidelete("bfa42nsiwn", 6, 
+    ["Expedition", "Pinto", "Yukon"])
 ```
 This would delete any records in table "bfa42nsiwn" where field ID 6 matches any of the following: "Expedition", "Pinto" or "Yukon". If 3 records were deleted, it would return a value of 3.
 
@@ -177,3 +178,43 @@ This would return the query string:
 ```html
 {8.XEX'Ford'}AND{8.XEX'Ram'}AND{8.XEX'GMC'}
 ```
+
+## create_pdf_b64 Function:
+This function takes a dictionary object containing the pdf rendering options and returns a base64 encoded pdf of the currently loaded page. (Quickbase requires uploaded files to be base64 encoded.)
+
+
+
+The single parameter is a dictionary object:
+
+```javascript
+{
+    margin:       1,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+}
+```
+
+Read more about these options at [html2pdf](https://ekoopmans.github.io/html2pdf.js/)
+
+
+### create_pdf_b64 Function Example:
+If you want to create a record in QB and upload a pdf to a file attachment field. (In this example the FID for that file attachment field is 8.) If you want to upload a file to an existing record, include the RID of that record in the record object.
+
+```javascript
+let options = {
+    margin:       1,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+}
+
+let pdf_b64 = client_object.create_pdf_b64(options)
+
+let file_upload = {
+  fileName: "test.pdf",
+  data: pdf_b64
+}
+let records_created = client_object.post("bfa42nsiwn", [{8: {value: file_upload}}])
+```
+
