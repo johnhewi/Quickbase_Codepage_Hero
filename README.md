@@ -195,7 +195,7 @@ The single parameter is a dictionary object:
 }
 ```
 
-Read more about these options at [html2pdf](https://ekoopmans.github.io/html2pdf.js/)
+Read more about these options and how to render the page itself (for example, omit elements from the pdf render) at [html2pdf](https://ekoopmans.github.io/html2pdf.js/)
 
 
 ### create_pdf_b64 Function Example:
