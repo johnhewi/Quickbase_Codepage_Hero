@@ -209,7 +209,7 @@ let options = {
     jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
 }
 
-let pdf_b64 = client_object.create_pdf_b64(options)
+let pdf_b64 = create_pdf_b64(options)
 
 let file_upload = {
   fileName: "test.pdf",
