@@ -199,7 +199,7 @@ Read more about these options and how to render the page itself (for example, om
 
 
 ### create_pdf_b64 Function Example:
-If you want to create a record in QB and upload a pdf to a file attachment field. (In this example the FID for that file attachment field is 8.) If you want to upload a file to an existing record, include the RID of that record in the record object.
+If you want to create a record in Quickbase and upload a pdf to a file attachment field. (In this example the Field ID (FID) for that file attachment field is 8.) If you want to upload a file to an existing record, include the Record ID (RID) of that record in the record object.
 
 ```javascript
 let options = {
