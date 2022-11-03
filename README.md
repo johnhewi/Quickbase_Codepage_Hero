@@ -215,6 +215,7 @@ let file_upload = {
   fileName: "test.pdf",
   data: pdf_b64
 }
+
 let records_created = client_object.post("bfa42nsiwn", [{8: {value: file_upload}}])
 ```
 
