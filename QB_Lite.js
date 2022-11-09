@@ -406,3 +406,40 @@ async function create_pdf_b64(opt){
     return pdf_object.split('base64,')[1]
 }
 
+//function that takes a url and returns a base64 string
+async function url_to_b64(url) {
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+            var reader = new FileReader();
+            reader.onloadend = function() {
+                resolve(reader.result);
+            }
+            reader.readAsDataURL(xhr.response);
+        };
+        xhr.open('GET', url);
+        xhr.responseType = 'blob';
+        xhr.send();
+    });
+}
+
+//function that takes in a number and returns a currency format with 2 decimal places
+function formatCurrency(num) {
+    return "$" + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}
+
+//function to change date to mm-dd-yyyy
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2)
+        month = '0' + month;
+    if (day.length < 2)
+        day = '0' + day;
+
+    return [month, day, year].join('-');
+}
+
