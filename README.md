@@ -7,7 +7,7 @@ These are some basic tools for the [Quickbase API](https://developer.quickbase.c
 
 Simply include the following in your .html file:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/johnhewi/QB_Lite@411beb4af1a2c67b4211f714c2a525702567012d/QB_Lite.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/johnhewi/Quickbase_Codepage_Hero@0150e1ebf0a8b23a945c535eafd3b2147b90047d/quickbase_codepage_hero.js"></script>
 ```
 
 
@@ -40,6 +40,11 @@ This is the method for querying Quickbase. It takes as parameters the table ID(s
 ```javascript
 client_object.query(table_id, query, array) 
 ```
+There is an additional optional parameter, additionalParams(dict). This is a dictionary of additional query parameters. 
+
+```javascript
+client_object.query(table_id, query, array, additionalParams)
+```
 ### Query Method Example::
 
 ```javascript
@@ -55,7 +60,35 @@ This would return all the records in the table with table ID "bfa42nsiwn" where 
 }
     
 ```
+### Query Example with additionalParams:
 
+```javascript
+let additionalParams = {
+    "sortBy": [
+        {
+            "fieldId": 3,
+            "order": "ASC"
+        },
+        {
+            "fieldId": 5,
+            "order": "ASC"
+        }
+    ],
+    "groupBy": [
+        {
+            "fieldId": 7,
+            "grouping": "equal-values"
+        }
+    ],
+    "options": {
+        "skip": 0,
+        "top": 0,
+        "compareWithAppLocalTime": false
+    }
+}
+
+let returned_records = client_object.query("bfa42nsiwn", "{3.GT.0}", [3,5,7], additionalParams)
+```
 
 
 ## Multiquery Method:
