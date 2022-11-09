@@ -1,4 +1,4 @@
-# QB_Lite
+# Quickbase Codepage Hero
 JavaScript Tools for Quickbase Codepages
 
 These are some basic tools for the [Quickbase API](https://developer.quickbase.com/).
