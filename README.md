@@ -7,7 +7,7 @@ These are some basic tools for the [Quickbase API](https://developer.quickbase.c
 
 Simply include the following in your .html file:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/johnhewi/QB_Lite@4bca8387663c5f2a084cf1d2d94d17111a074628/QB_Lite.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/johnhewi/QB_Lite@411beb4af1a2c67b4211f714c2a525702567012d/QB_Lite.js"></script>
 ```
 
 
@@ -181,8 +181,8 @@ This would return the query string:
 
 ## create_pdf_b64 Function:
 This function takes a dictionary object containing the pdf rendering options and returns a base64 encoded pdf of the currently loaded page. (Quickbase requires uploaded files to be base64 encoded.)
-
-
+All images must be base64 encodes strings in order to render in the pdf.
+You can use the provided url_to_base64 function to convert an image to a base64 encoded string.
 
 The single parameter is a dictionary object:
 
@@ -191,7 +191,8 @@ The single parameter is a dictionary object:
     margin:       1,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy']}
 }
 ```
 
@@ -206,7 +207,8 @@ let options = {
     margin:       1,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy']}
 }
 
 let pdf_b64 = create_pdf_b64(options)
@@ -219,3 +221,30 @@ let file_upload = {
 let records_created = client_object.post("bfa42nsiwn", [{8: {value: file_upload}}])
 ```
 
+## url_to_b64 Function:
+When rendering a pdf, all images must be base64 encoded strings. This function takes a url and returns a base64 encoded string of the image at that url. It takes as parameters the url (str) of the image you want to convert to base64. It returns a base64 encoded string of the image at that url. Simply replace the source (src) of the image with the base64 encoded string.
+
+### url_to_b64 Function Example:
+```javascript
+document.getElementById("img_area").innerHTML = `<img src="${await url_to_b64("https://www.cats.com/kitten.jpg")}">`
+```
+This would render the image at the url in the span with id "img_area", and the image can now be included in a rendered pdf.
+
+## formatCurrency Function:
+This function takes a number and returns a string formatted as a currency. It takes as parameters the number (num) you want to format. It returns a string formatted as a currency, for example: $3.50. 
+
+### formatCurrency Function Example:
+```javascript
+let formatted_currency = formatCurrency(3.5)
+```
+formatted_currency now equals the string: "$3.50"
+
+## formatDate Function:
+This function takes a date and returns a string formatted as a date. It takes as parameters the date (date, returned from a QB date or datetime field) you want to format. It returns a string formatted as a date, for example: 12-31-2020.
+
+### formatDate Function Example:
+Let us say qb_datetime is a datetime returned from QB, such as "2020-12-31T04:03:57Z".
+```javascript
+let formatted_date = formatDate(qb_datetime)
+```
+formatted_date now equals the string: "12-31-2020"
