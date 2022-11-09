@@ -228,7 +228,7 @@ When rendering a pdf, all images must be base64 encoded strings. This function t
 ```javascript
 document.getElementById("img_area").innerHTML = `<img src="${await url_to_b64("https://www.cats.com/kitten.jpg")}">`
 ```
-This would render the image at the url in the span with id "img_area", and the image can now be included in a rendered pdf.
+This would render the image at the url in the element with id "img_area", and the image can now be included in a rendered pdf.
 
 ## formatCurrency Function:
 This function takes a number and returns a string formatted as a currency. It takes as parameters the number (num) you want to format. It returns a string formatted as a currency, for example: $3.50. 
