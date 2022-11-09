@@ -34,13 +34,20 @@ class client {
 
     //RETURNS:
     // an array of the found records
-    async query(table, query, selectArray) {
+    async query(table, query, selectArray, additionalParams = null) {
 
         const body = {
             "from": table,
             "select": selectArray,
             "where": `${query}`
         };
+
+        if (additionalParams !== null) {
+            //add additional parameters to the body
+            for (const [key, value] of Object.entries(additionalParams)) {
+                body[key] = value
+            }
+        }
 
         let response = {};
         response.status = 429
