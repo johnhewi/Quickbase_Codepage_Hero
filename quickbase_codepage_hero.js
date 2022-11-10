@@ -73,6 +73,7 @@ class client {
         }else{
             console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
             console.log("response: ", response.json())
+            return response
         }
     }
 
@@ -143,6 +144,7 @@ class client {
             }else{
                 console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
                 console.log("response: ", response.json())
+                return response
             }
         }
         return datareturn;
@@ -211,9 +213,8 @@ class client {
                     }
                 }
             }
-
+            return response
         }
-
     }
 
 
@@ -258,6 +259,7 @@ class client {
         }else{
             console.log("Error deleting records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
             console.log("response: ", response.json())
+            return response
         }
     }
 
@@ -326,7 +328,7 @@ class client {
             }else{
                 console.log("Error querying records. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
                 console.log("response: ", response.json())
-                return
+                return response
             }
         }
         return number_deleted
@@ -367,6 +369,7 @@ class client {
             //give error to user
             console.log("Error querying for field choices. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
             console.log("response: ", response.json())
+            return response
         }
 
     }
