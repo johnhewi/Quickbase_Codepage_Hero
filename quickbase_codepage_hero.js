@@ -324,6 +324,7 @@ class client {
 
             if(response.status === 200){
                 let data = await response.json()
+                console.log("multidelete response: ", data)
                 number_deleted+=data['numberDeleted']
 
             }else{
@@ -453,4 +454,5 @@ function formatDate(date) {
 
     return [month, day, year].join('-');
 }
+
 
