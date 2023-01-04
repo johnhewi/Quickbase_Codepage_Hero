@@ -7,7 +7,7 @@ These are some basic tools for the [Quickbase API](https://developer.quickbase.c
 
 Simply include the following in your .html file:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/johnhewi/Quickbase_Codepage_Hero@96070f1d3e8656aff35230b3e596b5ad0c921a83/quickbase_codepage_hero.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/johnhewi/Quickbase_Codepage_Hero@385fd64b56149e6ba5720c039ddfa0f7ff8fc817/quickbase_codepage_hero.js"></script>
 ```
 
 
