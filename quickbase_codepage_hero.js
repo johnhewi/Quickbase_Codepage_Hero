@@ -3,11 +3,10 @@ class record {
         this.tableId = tableId;
         this.fieldList = fieldList;
         this.client = client;
-        this.formInstructions = null;
         this.qb_dict = this.getQbValidationData();
         this.forms = []
         this.submitErrors = 0
-        this.record = {}
+        this.record_data = {}
         this.RID_FID = 3
         this.rid = null
         this.lastRecord = null
@@ -23,27 +22,31 @@ class record {
         console.log("validationObjects: ", validationObjects)
 
         for(let key in validationObjects){
-            console.log("key: ", key)
-            let r = await fetch(`https://api.quickbase.com/v1/fields?tableId=${key}`, {
-                method: 'GET',
-                headers: this.client.headers,
-            })
+            let field_data = []
 
-            let field_data = await r.json()
-            console.log("FIELD DATA: ", field_data)
-            console.log("first item in field_data: ", field_data[0])
+            // check if key is in this.client.schemas
+            if(key in this.client.schemas){
+                // if it is, get the field data from the schema
+                field_data = this.client.schemas[key]
+            }else{
+                let r = await fetch(`https://api.quickbase.com/v1/fields?tableId=${key}`, {
+                    method: 'GET',
+                    headers: this.client.headers,
+                })
+
+                field_data = await r.json()
+            }
+            console.log("RAW field_data: ", field_data)
+
+            this.client.schemas[key] = field_data
+
             let fields_to_return = {}
             for (let i = 0; i < field_data.length; i++) {
                 let field = field_data[i]
-                console.log("field data id from assignment: ", field['id'])
-                console.log("field_data[i]['id']: ", field_data[i]['id'])
-                console.log("FIELD AFTER ASSIGNMENT: ", field)
                 if (field['properties']['primaryKey']) {
                     response['primaryKey'] = field['id'];
                 }
                 if (validationObjects[key].includes(field['id'])) {
-                    console.log("field id: ", field['id'])
-                    console.log("field: ", field)
                     fields_to_return[field['id']] = {
                         required: field['required'],
                         fieldType: field['fieldType'],
@@ -73,23 +76,36 @@ class record {
     async getParentData(formElement) {
         console.log("formElement in getParentData: ", formElement)
 
-        // get the validation data from the server
-        let validationObjects = await this.getValidationDictFromRecord()
-        let parentData = await fetch(this.validatorObject.endpoint_url, {
-            method: 'POST',
-            mode: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': this.validatorObject.csrf_token
-            },
-            body: JSON.stringify({
-                'data': formElement,
-                'manner': 'getParentData'
-            })
-        })
-        return parentData.json()
-    }
+        let body = {
+            "from": formElement['parentTableID'],
+            "select": [formElement['parentTableKeyFid'], formElement['id']],
+            "where": "{3.GT.0}",
+        }
 
+        if('name-fid' in formElement){
+            body['select'] = [formElement['parentTableKeyFid'], formElement['name-fid']]
+        }
+
+        if('query' in formElement){
+            // loop through the key value pairs in the query object and add them to body
+            for(let key in formElement['query']){
+                body[key] = formElement['query'][key]
+            }
+        }
+
+        console.log("body: ", body)
+
+        let response = await fetch('https://api.quickbase.com/v1/records/query', {
+            method: 'POST',
+            headers: this.client.headers,
+            body: JSON.stringify(body)
+        })
+
+        let data = await response.json()
+        console.log("data: ", data)
+        return data
+
+    }
 
     async getValidationDictFromRecord() {
         // create a dictionary to hold the validation data
@@ -111,52 +127,39 @@ class record {
     }
 
     async create_record() {
+        let record_data = {}
+        if(this.rid !== null){
+            console.log("RID ISN'T NULL IN CREATE RECORD")
+            record_data[this.RID_FID] = {
+                'value': this.rid
+            }
+        }
 
-        console.log("this.values: ", this.values)
-        let record = {}
+        console.log("This.values: ", this.values)
+
         // loop through elements of this.values
         for (let element of this.values) {
             if(element.value !== ''){
                 // split the data-qb attribute into table_id and field_id
                 let field_id = element['id'].split('.')[1]
-                record[field_id] = { value: element.value }
+                record_data[field_id] = { value: element.value }
             }
         }
 
-        record[this.RID_FID] = { value: this.rid }
-
-        console.log("record: ", record)
-        this.record = record
+        console.log("record_data at end of creat record: ", record_data)
+        this.record_data = record_data
     }
 
     async postNewRecord() {
-        let record = await this.record
-        let response = await fetch(this.validatorObject.endpoint_url, {
-            method: 'POST',
-            mode: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': this.validatorObject.csrf_token
-            },
-            body: JSON.stringify({
-                'data': {
-                    'tableID': this.tableId,
-                    'data': record
-                },
-                'manner': 'postRecord'
-            })
-        })
-        let parsedResponse = await response.json()
-
-        console.log("parsedResponse: ", parsedResponse)
-
-        if('metadata' in parsedResponse){
-            if('createdRecordIds' in parsedResponse['metadata']){
-                this.record[this.RID_FID] = { 'value' : parsedResponse['metadata']['createdRecordIds'][0]}
-                // this.rid = parsedResponse['metadata']['createdRecordIds'][0]
+        let record_data = await this.record_data
+        console.log("record in post record: ", record_data)
+        let response = await this.client.post(this.tableId, [record_data])
+        if ('createdRecordIds' in response) {
+            if (response['createdRecordIds'].length > 0) {
+                await this.setRID(response['createdRecordIds'][0])
             }
+            return response
         }
-        return parsedResponse
     }
 
     async queryRecords(tableId, select, where, additionalParams={}) {
@@ -309,8 +312,6 @@ class record {
         Array.from(elements).forEach(function(input) {
             let table_id = input.getAttribute('data-qb').split('.')[0]
             let field_id = parseInt(input.getAttribute('data-qb').split('.')[1])
-            console.log("table_id: ", table_id)
-            console.log("field_id: ", field_id)
             let fieldObj = {
                 id: input.id,
                 value: input.value,
@@ -401,71 +402,65 @@ class record {
         })
     }
 
-    async buildForeignKeyInput(formElement){
-        let formElementDiv = await buildDivAndLabel(formElement);
-        let selectElement = document.createElement("select");
-        selectElement.id = formElement['data-qb'];
-        selectElement.classList.add(formElement.class);
-        selectElement.setAttribute("data-qb", formElement['data-qb']);
-        if("parentName" in formElement){
-            // getParentData(formElement, formElement["parent-name"])
-        }
-        // formElementDiv.append(selectElement);
-        //
-        // for (let option of formElement.choices) {
-        //     let optionElement = document.createElement("option");
-        //     optionElement.setAttribute("value", option);
-        //     optionElement.innerHTML = option;
-        //     selectElement.append(optionElement);
-        // }
-        return formElementDiv;
+    async setRID(rid){
+        this.rid = rid
+        let current_record_data = await this.record_data
+        current_record_data[this.RID_FID] = {'value': rid}
+        this.record_data = current_record_data
     }
 
     async submitForm(formObject){
         console.log("buttonID:", this.tableId+"form"+this.forms.length)
-
-        // if (await anyHelperText()){
-        //     await addTextOutsideSubmitButton(this.tableId+"form"+this.forms.length, "There is still a problem with your input. Please check the highlighted fields.")
-        //     console.log("There is helper text on the page")
-        //     return
-        // }
         let validation = await this.qb_validate(formObject)
-
         if(validation){
+            console.log("this.record at beginning of submitForm: ", this.record_data)
             await this.create_record()
+            console.log("this.record after create_record: ", this.record_data)
             await addTextOutsideSubmitButton(this.tableId+"form"+this.forms.length, "Input looks good! Uploading record...")
-            console.log("Validation: ", validation)
-            console.log("this rid: ", this.rid)
-            console.log("this record: ", this.record)
-            console.log("last record: ", this.lastRecord)
-            if(this.lastRecord === this.record){
+            // disable the submit button
+            document.getElementById(this.tableId+"form"+this.forms.length).disabled = true
+
+            console.log("this record data: ", await this.record_data)
+            console.log("last record: ", await this.lastRecord)
+
+            if(this.rid !== null && recordsAreTheSame(await this.record_data, await this.lastRecord)){
                 await addTextOutsideSubmitButton(this.tableId+"form"+this.forms.length, "You haven't made any changes to the record.")
-                return
-            }
-            let response = await this.postNewRecord()
-            console.log("post response: ", response)
-            if('metadata' in response){
-                if('createdRecordIds' in response.metadata){
-                    if(response.metadata.createdRecordIds.length > 0){
-                        if(this.rid === null) {
+                // enable the submit button
+                document.getElementById(this.tableId+"form"+this.forms.length).disabled = false
+            }else{
+                let response = await this.postNewRecord()
+                console.log("post response: ", response)
+                if('createdRecordIds' in response){
+                    console.log("RECORD CREATED")
+                    if(response.createdRecordIds.length > 0){
+                        console.log("MORE THAN ZERO RECORDS CREATED")
+                        if(this.rid !== null) {
                             await addTextOutsideSubmitButton(this.tableId + "form" + this.forms.length, "Record successfully created!")
                             document.getElementById(this.tableId + "form" + this.forms.length).innerHTML = "Edit"
-                            this.rid = await this.record[this.RID_FID]['value']
-                            this.lastRecord = await this.record
+                            // enable the submit button
+                            document.getElementById(this.tableId + "form" + this.forms.length).disabled = false
+                            console.log("this.rid after assignment: ", this.rid)
+                            console.log("this.record after assignment: ", this.record_data)
+                            this.lastRecord = await this.record_data
                         }
                     }else{
-                        if('metadata' in response){
-                            if('updatedRecordIds' in response.metadata){
-                                if(response.metadata.updatedRecordIds.length > 0){
-                                    await addTextOutsideSubmitButton(this.tableId + "form" + this.forms.length, "Record successfully edited!")
-                                    this.lastRecord = await this.record
-                                }else{
-                                    await addTextOutsideSubmitButton(this.tableId + "form" + this.forms.length, "The record was unchanged, did you change any of the values?    ")
-                                }
+                        if('updatedRecordIds' in response){
+                            if(response.updatedRecordIds.length > 0){
+                                await addTextOutsideSubmitButton(this.tableId + "form" + this.forms.length, "Record successfully edited!")
+                                // enable the submit button
+                                document.getElementById(this.tableId + "form" + this.forms.length).disabled = false
+                                this.lastRecord = await this.record_data
+                            }else{
+                                await addTextOutsideSubmitButton(this.tableId + "form" + this.forms.length, "The record was unchanged, did you change any of the values?    ")
+                                // enable the submit button
+                                document.getElementById(this.tableId + "form" + this.forms.length).disabled = false
                             }
-                        }else{
-                            await addTextOutsideSubmitButton(this.tableId+"form"+this.forms.length, "There was a problem creating the record. Please try again.")}
+                        }
                     }
+                }else{
+                    await addTextOutsideSubmitButton(this.tableId+"form"+this.forms.length, "There was a problem creating the record. Please try again.")
+                    // enable the submit button
+                    document.getElementById(this.tableId+"form"+this.forms.length).disabled = false
                 }
             }
         }else{
@@ -562,8 +557,8 @@ class record {
 }
 
 class recordList {
-    constructor(validatorObject, tableId, select, where, additionalParameters = {}) {
-        this.validatorObject = validatorObject
+    constructor(client, tableId, select, where, additionalParameters = {}) {
+        this.validatorObject = client
         this.tableId = tableId
         this.recordIDs = []
         this.fieldList = select
@@ -671,14 +666,6 @@ class recordList {
         }
         return validationDict;
     }
-}
-
-class endpoint {
-    constructor(endpoint_url, csrf_token) {
-        this.endpoint_url = endpoint_url
-        this.csrf_token = csrf_token
-        this.qb_dict = {}
-    }//end constructor
 }
 
 // function to check if a value is text
@@ -842,9 +829,6 @@ async function removeHelperText(element) {
     let style = await getComputedStyle(template_element)
     console.log("style: ", style)
     element.style = style
-    // element.style.color = style.color
-    // element.style.outline = style.outline
-    // element.style.borderColor = style.borderColor
     // if element has a data-helpertext attribute, remove it
     if(element.getAttribute('data-helpertext')){
         element.removeAttribute('data-helpertext')
@@ -970,16 +954,6 @@ async function buildDivAndLabel(formElement){
 }
 
 async function buildInput(formElement){
-    let type = "text"
-    switch(formElement.type){
-        case "text":
-            break
-
-    }
-
-}
-
-async function buildInput(formElement){
     let formElementDiv = await buildDivAndLabel(formElement);
     let inputElement = document.createElement("input");
     inputElement.id = formElement['data-qb'];
@@ -1079,13 +1053,6 @@ async function buildRatingInput(formElement){
     let span = document.createElement("span");
     // change span class to 'star-cb-group'
     span.classList.add("star-cb-group");
-
-    // let input = document.createElement("input");
-    // input.setAttribute("type", "radio");
-    // input.setAttribute("name", 'rating');
-    // input.setAttribute("id", formElement['data-qb']);
-    // input.setAttribute("value", 5);
-
 
     let html =`
                 <span class="star-cb-group">
@@ -1237,9 +1204,13 @@ function returnErrorMessage(numberOfErrors){
     if(numberOfErrors === 1){
         return "There is still a problem with your submission. Have you checked the highlighted fields?"
     }
+    return returnRandomTaunt() + " Please try again.";
+}
+
+function returnRandomTaunt(){
     let sentences = ["Maybe if you try again you'll get a better result?", "Haha, you thought that would work?", "That's NOT the right answer.. *heavy sigh*", "Do I look like a fortuneteller to you?", "Wow, your attempt was really something else...", "Are you kidding me right now?", "Didn't your mother ever teach you to think before doing?", "Hey, I love your enthusiasm but this isn't working.", "Nope, sorry, wrong input!", "Let's face it, you are no mathematician...", "Come on now, try again!", "I think you missed the boat on this one.", "That's an automatic fail, my friend!", "Input invalid! Please try again!", "Sigh... Please don't do that again?", "How about we find your correct input this time?", "Oooh... that one didn't quite work out.", "Well, that wasn't what I was expecting...", "WRONG!!! Do you want to try again?", "I'm pretty sure that was totally wrong!", "Uhhh... no! Try again, please!", "Do I really have to explain why that won't work?", "That was an epic fail, to be honest.", "I don't think that'll pass the test.", "Try again or I'm sending you back to the start.", "Just face it - you failed.", "What was that supposed to be?", "Nope, sorry. You gotta do better.", "Um... I think you mistyped something.", "I think that one didn't quite work out.", "You ain't gonna get no prizes for that attempt!", "That's a no-brainer - wrong!", "Seriously, what were you thinking?!", "That's not even close to being right!", "Oh, so very wrong...", "Mmm, not quite!", "Boy, you sure messed up on that one, didn't you?", "Oops! Wrong input! Try again!", "Umm, yeah, think again, pal!", "Really? That didn't work?", "You missed the mark on this one, buddy.", "Aaaand that one was a dud!", "Haha! No, that won't work!", "I think you know the answer - wrong!", "That was wrong, just wrong!", "No! That input won't do!", "NU-UH. Invalid input!", "Come on... you can do better than that!", "Nope, try again! That didn't work!", "Boy, you need to get your game together.", "Seriously!? Even I know that won't work!", "Oh no! That was not the correct answer!", "Well, that didn't end too well, did it?", "Ah, wrong! Not even close!", "That was a valiant attempt, but no!", "Forget about that - it's wrong!", "Haha, you thought THAT would work?", "Wrong, wrong, wrong!", "Hm, no. That won't work.", "Are you sure you meant to enter that?", "That one's out of the question - wrong!", "Nope, not gonna fly! Try again.", "No, no, no. That won't work!", "Really? You know that's not right!", "That'll be a 'no' from me.", "That won't work, my friend.", "Oh puh-lease - that one is wrong!", "What you have entered is incorrect.", "Can you try harder than that please?", "Yes, that was wrong. I'm sorry.", "Sorry mate, that won't do.", "May I suggest another option?", "MAN, that was wrong!", "Incorrect input! Please try again.", "That one didn't even get close!", "That isn't even in the ballpark!", "Haha... wow, why did you even bother?", "That's incorrect. Big surprise, right?", "Ugh, that was the wrong input.", "Let's not go down that path again, shall we?", "Try it again, this time with feeling!", "No, that won't get you anywhere.", "Woah woah woah, wrong input!", "I'm afraid that didn't work.", "Nuh-uh! We have to try again.", "No, that input won't get us where we need to go.", "Input invalid! Input again!", "Like, really? That won't work.", "That won't work - Are you paying attention?", "Nooo, not even close! Let's try again.", "Yikes, that wasn't quite it.", "Exuse me? That input won't do!", "Oh gosh, wrong again?", "Uh oh, wrong input! Try again.", "Oy vey! That's not the answer!", "Um, that's wrong. Let's try something else.", "That one was wrong but better luck this time!", "Come on! You can do better than that!", "Yeah, no. That won't work.", "Let's make sure the next one is correct, OK?", "Improper input! Start again, please.", "Ugh, wrong again. Sigh...."]
     let randomIndex = Math.floor(Math.random() * sentences.length);
-    return sentences[randomIndex] + " Please, try again.";
+    return sentences[randomIndex];
 }
 
 function convertDatetime(datetime) {
@@ -1267,6 +1238,7 @@ class client {
 
         this.numberOfAttempts = numberOfAttempts
         this.timeout = timeout
+        this.schemas = {}
 
     }//end constructor
 
@@ -1708,4 +1680,22 @@ function formatDate(date) {
         day = '0' + day;
 
     return [month, day, year].join('-');
+}
+
+function recordsAreTheSame(recordA, recordB) {
+
+    // if recordA and recordB have a different number of keys, return false
+    if (Object.keys(recordA).length !== Object.keys(recordB).length) {
+        return false;
+    }
+
+    var recordsAreSame = true;
+    for(let FID in recordA) {
+        if(recordA[FID]['value'] !== recordB[FID]['value']) {
+            recordsAreSame = false;
+            break;
+        }
+    }
+
+    return recordsAreSame;
 }
