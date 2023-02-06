@@ -350,7 +350,7 @@ class client {
         let response = {};
         response.status = 429
         let attemptCounter = 0
-        let fetch_url = "https://api.quickbase.com/v1/fields/"+field_id.toString()+"?tableId="+table_id+"&includeFieldPerms=False"
+        let fetch_url = "https://api.quickbase.com/v1/fields/"+field_id.toString()+"?tableId="+table_id+"&includeFieldPerms=false"
 
         while(response["status"] === 429 && attemptCounter<=this.numberOfAttempts) {
 
