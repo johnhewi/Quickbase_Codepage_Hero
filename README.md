@@ -22,9 +22,7 @@ const client_object = new client()
 
 This will use the credentials that quickbase already has stored from your session. 
 
-("Null" is required for now as the first parameter to ensure backwards compatibility, but this will be changed in the future.)
-
-You can also use a user token (str) and realm url (str) to instantiate a client object:
+Alternatively, you can use a user token (str) and realm url (str) to instantiate a client object:
 
 ```javascript
 const client_object = new client(user_token, realm_url) 
@@ -36,6 +34,7 @@ CAUTION: Don't store a user token in a codepage! For local development, you can 
 DEVENV.js:
 ```javascript
 let user_token = 'my_user_token'
+let realm_url = 'myrealm.quickbase.com'
 ```
 
 
@@ -49,11 +48,11 @@ Then in your javascript, do something like:
 ```javascript
 //if localhost is in the url, initialize client with user_token and realm
 if (window.location.href.includes("localhost")){
-    client = new client(user_token, 'myrealm.quickbase.com')
+    client = new client(user_token, realm_url)
 }
 ```
 
-Now you will always load with the user token when you are developing locally, but when you deploy to Quickbase, it will use the credentials from your session.
+Now you will use your locally stored user token and realm when you are developing locally, but when you deploy to Quickbase, it will use the credentials from your session to automatically get a temporary token.
 
 You can use two additional optional parameters. numberOfAttempts(int) and timout(int). NumberOfAttempts is how many additional attempts will be made if a post results in a 429 error, "Too Many Requests." It will stop attempting once a post is successful. Timeout is how many milliseconds the application will wait before attempting again. These are both set to 0 by default. 
 
