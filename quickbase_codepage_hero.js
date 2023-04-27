@@ -9,15 +9,18 @@
 //timeout: How long you want to wait in milliseconds between attempts if Quickbase returns a 429 code (too many requests) (integer)
 
 class client {
-    constructor(userToken, realm, numberOfAttempts=0, timeout=0) {
-        this.headers = {
-            "QB-Realm-Hostname": realm,
-            'Content-Type': 'application/json',
-            'Authorization': 'QB-USER-TOKEN ' + userToken
-        };
+    constructor(userToken=null, realm=null, numberOfAttempts=0, timeout=0) {
 
+
+        this.userToken = userToken
+        this.realm = realm
         this.numberOfAttempts = numberOfAttempts
         this.timeout = timeout
+
+        if(realm === null){
+            // get the domain from the url
+            this.realm = window.location.hostname.split(".")[0]+'.quickbase.com'
+        }
 
     }//end constructor
 
@@ -57,9 +60,10 @@ class client {
 
             response = await fetch('https://api.quickbase.com/v1/records/query', {
                 method: 'POST',
-                headers: this.headers,
+                headers: await this.getHeaders(table),
                 body: JSON.stringify(body)
             })
+            console.log("response: ", response)
             if (response.status === 429) {
                 console.log("Too Many Request, Trying Again")
                 await new Promise(resolve => setTimeout(resolve, this.timeout))
@@ -128,7 +132,7 @@ class client {
 
                 response = await fetch('https://api.quickbase.com/v1/records/query', {
                     method: 'POST',
-                    headers: this.headers,
+                    headers: await this.getHeaders(table),
                     body: JSON.stringify(body)
                 })
                 if (response.status === 429) {
@@ -178,7 +182,7 @@ class client {
 
             response = await fetch('https://api.quickbase.com/v1/records', {
                 method: 'POST',
-                headers: this.headers,
+                headers: await this.getHeaders(table_id),
                 body: JSON.stringify(data)
             })
             if (response.status === 429) {
@@ -243,7 +247,7 @@ class client {
 
                 response = await fetch('https://api.quickbase.com/v1/records', {
                     method: 'DELETE',
-                    headers: this.headers,
+                    headers: await this.getHeaders(table_id),
                     body: JSON.stringify(body)
                 })
 
@@ -312,7 +316,7 @@ class client {
 
                 response = await fetch('https://api.quickbase.com/v1/records', {
                     method: 'DELETE',
-                    headers: this.headers,
+                    headers: await this.getHeaders(table_id),
                     body: JSON.stringify(body)
                 })
                 if (response.status === 429) {
@@ -341,7 +345,7 @@ class client {
 
     //PARAMETERS:
 
-    //table_id(str) 
+    //table_id(str)
     //FID (int)
 
 
@@ -356,7 +360,7 @@ class client {
 
             response = await fetch(fetch_url, {
                 method: 'GET',
-                headers: this.headers,
+                headers: await this.getHeaders(table_id),
             })
 
             if (response.status === 429) {
@@ -376,6 +380,51 @@ class client {
             return response
         }
 
+    }
+
+    //GET AUTHORIZATION
+    async getAuthorization(table_id){
+        if (this.userToken !== null){
+            return 'QB-USER-TOKEN ' + this.userToken
+        }else{
+            var headers = {
+                'QB-Realm-Hostname': this.realm,
+                'Content-Type': 'application/json'
+            }
+
+            let response = await fetch(`https://api.quickbase.com/v1/auth/temporary/${table_id}`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'include'
+            })
+
+            let result = await response.json();
+
+            console.log("TEMPORARY TOKEN RESPONSE: ", result)
+
+            if ('temporaryAuthorization' in result) {
+                this.userToken = result.temporaryAuthorization;
+                return 'QB-TEMP-TOKEN ' + this.userToken
+            }
+            else {
+                console.log("error getting temporary token: ", result);
+            }
+        }
+    }
+
+    async getHeaders(table_id){
+
+        console.log("getting headers...")
+        console.log("this realm: ", this.realm)
+        let headers = {
+            'QB-Realm-Hostname': this.realm,
+            'Authorization': await this.getAuthorization(table_id),
+            'Content-Type': 'application/json'
+        }
+
+        console.log("headers: ", headers)
+
+        return headers
     }
 
 
