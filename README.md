@@ -52,7 +52,7 @@ if (window.location.href.includes("localhost")){
 }
 ```
 
-Now you will use your locally stored user token and realm when you are developing locally, but when you deploy to Quickbase, it will use the credentials from your session to automatically get a temporary token.
+Now your page will use your locally stored user token and realm when you are developing locally, but when you deploy to Quickbase, it will use the credentials from your session to automatically get a temporary token.
 
 You can use two additional optional parameters. numberOfAttempts(int) and timout(int). NumberOfAttempts is how many additional attempts will be made if a post results in a 429 error, "Too Many Requests." It will stop attempting once a post is successful. Timeout is how many milliseconds the application will wait before attempting again. These are both set to 0 by default. 
 
