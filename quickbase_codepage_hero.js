@@ -209,16 +209,16 @@ class client {
                 if ('lineErrors' in data['metadata']) {
                     let dict = data['metadata']['lineErrors']
                     for ( const [key] of Object.entries(dict)) {
-                            console.log("Line errors from posting Record #", key, ":")
-                            for (let i = 0; i < data['metadata']['lineErrors'][key].length; i++) {
-                                console.log(data['metadata']['lineErrors'][key][i])
-                            }
+                        console.log("Line errors from posting Record #", key, ":")
+                        for (let i = 0; i < data['metadata']['lineErrors'][key].length; i++) {
+                            console.log(data['metadata']['lineErrors'][key][i])
+                        }
 
                     }
                     return data
                 }
             }
-            return response
+            return data
         }
     }
 
@@ -245,11 +245,11 @@ class client {
         let attemptCounter = 0
         while(response["status"] === 429 && attemptCounter<=this.numberOfAttempts) {
 
-                response = await fetch('https://api.quickbase.com/v1/records', {
-                    method: 'DELETE',
-                    headers: await this.getHeaders(table_id),
-                    body: JSON.stringify(body)
-                })
+            response = await fetch('https://api.quickbase.com/v1/records', {
+                method: 'DELETE',
+                headers: await this.getHeaders(table_id),
+                body: JSON.stringify(body)
+            })
 
             if (response.status === 429) {
                 console.log("Too Many Request, Trying Again")
@@ -403,13 +403,28 @@ class client {
             console.log("TEMPORARY TOKEN RESPONSE: ", result)
 
             if ('temporaryAuthorization' in result) {
-                this.userToken = result.temporaryAuthorization;
-                return 'QB-TEMP-TOKEN ' + this.userToken
+                return 'QB-TEMP-TOKEN ' + result.temporaryAuthorization
             }
             else {
                 console.log("error getting temporary token: ", result);
             }
         }
+    }
+
+    async getUserInfo(){
+        let temp_token = await this.getAuthorization()
+
+        let url = `https://matthewclark-634.quickbase.com//db/main?a=API_GetUserInfo&ticket=${temp_token}`
+
+        let response = await fetch(url)
+
+        console.log("response: ", response)
+        let data = await response.text()
+
+        console.log("data: ", data)
+
+        return parseXmlToJsonObject(data)
+
     }
 
     async getHeaders(table_id){
@@ -506,4 +521,51 @@ function formatDate(date) {
     return [month, day, year].join('-');
 }
 
+function parseXmlToJsonObject(xmlString) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
+    // Initialize an empty JSON object to store the extracted values
+    const result = {};
+
+    // Helper function to safely extract text content from an element
+    const extractTextContent = (element, tagName) => {
+        const elements = element.getElementsByTagName(tagName);
+        return elements.length > 0 ? elements[0].textContent : null;
+    };
+
+    // Extract values from the XML document
+    const action = extractTextContent(xmlDoc, "action");
+    const errcode = extractTextContent(xmlDoc, "errcode");
+    const errtext = extractTextContent(xmlDoc, "errtext");
+    const userElement = xmlDoc.getElementsByTagName("user")[0];
+
+    // Add values to the JSON object if they exist
+    if (action) result.action = action;
+    if (errcode) result.errcode = errcode;
+    if (errtext) result.errtext = errtext;
+
+    if (userElement) {
+        const userId = userElement.getAttribute("id");
+        const firstName = extractTextContent(userElement, "firstName");
+        const lastName = extractTextContent(userElement, "lastName");
+        const login = extractTextContent(userElement, "login");
+        const email = extractTextContent(userElement, "email");
+        const screenName = extractTextContent(userElement, "screenName");
+        const isVerified = extractTextContent(userElement, "isVerified");
+        const externalAuth = extractTextContent(userElement, "externalAuth");
+
+        // Add user information to the JSON object if it exists
+        result.user = {};
+        if (userId) result.user.id = userId;
+        if (firstName) result.user.firstName = firstName;
+        if (lastName) result.user.lastName = lastName;
+        if (login) result.user.login = login;
+        if (email) result.user.email = email;
+        if (screenName) result.user.screenName = screenName;
+        if (isVerified) result.user.isVerified = isVerified;
+        if (externalAuth) result.user.externalAuth = externalAuth;
+    }
+
+    return result;
+}
