@@ -7,7 +7,7 @@ These are some basic tools for the [Quickbase API](https://developer.quickbase.c
 
 Simply include the following in your .html file:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/johnhewi/Quickbase_Codepage_Hero@f5efd6af7e5091d0b378114f6e855b6c3c08a4e4/quickbase_codepage_hero.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/johnhewi/Quickbase_Codepage_Hero@4f5cd5aa319c5b139d7bdb54997e8b8efc1358e7/quickbase_codepage_hero.js"></script>
 ```
 
 
@@ -229,6 +229,36 @@ choices = [
   "Land Cruiser"
 ]
 ```
+
+## getUserInfo Method:
+This method allows you to get information about the user who is logged in. It takes no parameters and returns a dictionary of information about the user.
+
+### getUserInfo Method Example:
+```javascript
+let user_info = client_object.getUserInfo()
+```
+
+This would return a dictionary of information about the user who is logged in. For example:
+```javascript
+{   
+    "action": "API_GetUserInfo",
+    "errcode": "0",
+    "errtext": "No error",
+    "user": {
+        "id": "62965273.djrm",
+        "firstName": "Norm",
+        "lastName": "MacDonald",
+        "login": "Normie",
+        "email": "norm@vegas.com",
+        "screenName": "Normie",
+        "isVerified": "1",
+        "externalAuth": "0"
+    }
+}
+```
+
+
+# Functions
 
 ## QueryStringBuilder Function:
 This function allows you to build a compound query string for use in the [Quickbase Query Language](https://help.quickbase.com/api-guide/componentsquery.html). It takes as parameters the field you wish to search(int), a Quickbase Query Language argument such as "EX" or "GT"(str), a logical operator like "AND" or "OR"(str) and an array of values(str or num) to include in the query. If the value in the array is a string, the function will automatically put single quotes around it. It returns a query string.
