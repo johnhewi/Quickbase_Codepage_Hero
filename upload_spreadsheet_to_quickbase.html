@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLS/XLSX to JSON Converter</title>
+    <script src="https://cdn.jsdelivr.net/gh/johnhewi/Quickbase_Codepage_Hero@4f5cd5aa319c5b139d7bdb54997e8b8efc1358e7/quickbase_codepage_hero.js"></script>
+</head>
+<body>
+    <h1>XLS/XLSX to Quickbase Records</h1>
+    <input type="file" id="fileInput" accept=".xls, .xlsx">
+    <div id="tableOutput"></div>
+    <button onclick="post_records()">POST TO QUICKBASE</button>
+    <div id="success"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+
+const client_object = new client()
+
+let table_id = "brx63uvhd"
+
+let excel_field_map = {
+    'Column 1': 34, // pick the column name in your spreadsheet and the field id in the quickbase table it maps to
+    'Column 2': 35, // if a column doesn't exist in the spreadsheet, or is missing, it will be ignored
+    'Column 3': 36
+}
+
+document.getElementById('fileInput').addEventListener('change', handleFile);
+
+let json_records = [];
+
+function handleFile(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Assuming the first sheet is the one you want to convert to JSON
+            const firstSheetName = workbook.SheetNames[0];
+            const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+            json_records = jsonData;
+
+
+
+        // Convert JSON to a table and display it
+        const tableOutput = document.getElementById('tableOutput');
+        tableOutput.innerHTML = jsonToTable(json_records);
+        };
+        reader.readAsArrayBuffer(file);
+    }
+}
+
+function jsonToTable(json) {
+    let cols = Object.keys(json[0]);
+
+    // Table start
+    let table = '<table border="1"><tr>';
+
+    // Headers
+    for (let col of cols) {
+        table += `<th>${col}</th>`;
+    }
+    table += '</tr>';
+
+    // Rows
+    for (let row of json) {
+        table += '<tr>';
+        for (let col of cols) {
+            table += `<td>${row[col]}</td>`;
+        }
+        table += '</tr>';
+    }
+
+    table += '</table>';
+    return table;
+}
+
+function transformData(json_data, field_map) {
+    let records = [];
+
+    json_data.forEach(item => {
+        console.log("Processing item:", item); // Log the current item
+        let record = {};
+        for (const key in item) {
+            if (field_map.hasOwnProperty(key)) {
+                let fieldKey = field_map[key];
+                record[fieldKey] = { value: item[key] };
+                console.log(`Mapped ${key} to ${fieldKey}:`, record[fieldKey]); // Log the mapping
+            }
+        }
+        console.log("Record created:", record); // Log the created record
+        records.push(record);
+    });
+
+    return records;
+}
+
+async function post_records(){
+    let records_created = await client_object.post(table_id, transformData(json_records, excel_field_map))
+    console.log("records created:", records_created)
+
+    if('createdRecordIds' in records_created){
+        document.getElementById('success').innerHTML=`${records_created['createdRecordIds'].length} records created`
+    }else{
+        document.getElementById('success').innerHTML=`there was an error posting the records: ${records_created}`
+    }
+
+}
+
+
+</script>
+
+
+
+</body>
+</html>
