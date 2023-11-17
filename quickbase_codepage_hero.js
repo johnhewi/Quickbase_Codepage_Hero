@@ -382,7 +382,7 @@ class client {
 
     }
 
-    async getfields(table_id){
+    async getFields(table_id){
 
         let response = {};
         response.status = 429
@@ -405,7 +405,7 @@ class client {
 
         if(response.status===200){
             let data = await response.json()
-            return await data['properties']['choices']
+            return await data
         }else{
             //give error to user
             console.log("Error querying for field choices. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
