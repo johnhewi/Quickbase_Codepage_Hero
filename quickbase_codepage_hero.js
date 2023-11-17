@@ -382,6 +382,39 @@ class client {
 
     }
 
+    async getfields(table_id){
+
+        let response = {};
+        response.status = 429
+        let attemptCounter = 0
+        let fetch_url = "https://api.quickbase.com/v1/fields/?tableId="+table_id+"&includeFieldPerms=false"
+
+        while(response["status"] === 429 && attemptCounter<=this.numberOfAttempts) {
+
+            response = await fetch(fetch_url, {
+                method: 'GET',
+                headers: await this.getHeaders(table_id),
+            })
+
+            if (response.status === 429) {
+                console.log("Too Many Request, Trying Again")
+                await new Promise(resolve => setTimeout(resolve, this.timeout))
+                attemptCounter++
+            }
+        }
+
+        if(response.status===200){
+            let data = await response.json()
+            return await data['properties']['choices']
+        }else{
+            //give error to user
+            console.log("Error querying for field choices. Quickbase error code: " + response.status + ". Error message: \""+response.statusText +"\"")
+            console.log("response: ", response.json())
+            return response
+        }
+
+    }
+
     //GET AUTHORIZATION
     async getAuthorization(table_id){
         if (this.userToken !== null){
