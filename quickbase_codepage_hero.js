@@ -447,7 +447,7 @@ class client {
     async getUserInfo(){
         let temp_token = await this.getAuthorization()
 
-        let url = `https://matthewclark-634.quickbase.com//db/main?a=API_GetUserInfo&ticket=${temp_token}`
+        let url = `https://${this.realm}//db/main?a=API_GetUserInfo&ticket=${temp_token}`
 
         let response = await fetch(url)
 
