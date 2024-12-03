@@ -168,11 +168,16 @@ class client {
     //a dictionary of arrays of the RID's that have been created, unchanged and edited
 
 
-    async post(table_id, record_array) {
+    async post(table_id, record_array, fieldsToReturn = null) {
         const data = {
             to: table_id,
             data: record_array
         };
+
+        //if fieldsToReturn is not null, add it to the body
+        if (fieldsToReturn !== null) {
+            data['fieldsToReturn'] = fieldsToReturn
+        }
 
         let response = {};
         response.status = 429
@@ -198,7 +203,8 @@ class client {
             return {
                 createdRecordIds: data.metadata.createdRecordIds,
                 unchangedRecordIds: data.metadata.unchangedRecordIds,
-                updatedRecordIds: data.metadata.updatedRecordIds
+                updatedRecordIds: data.metadata.updatedRecordIds,
+                createdRecords: data.data
             }
 
         } else {
