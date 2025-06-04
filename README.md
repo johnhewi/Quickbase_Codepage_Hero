@@ -54,16 +54,22 @@ if (window.location.href.includes("localhost")){
 
 Now your page will use your locally stored user token and realm when you are developing locally, but when you deploy to Quickbase, it will use the credentials from your session to automatically get a temporary token.
 
-You can use two additional optional parameters. numberOfAttempts(int) and timout(int). NumberOfAttempts is how many additional attempts will be made if a post results in a 429 error, "Too Many Requests." It will stop attempting once a post is successful. Timeout is how many milliseconds the application will wait before attempting again. These are both set to 0 by default. 
-
+You can use three additional optional parameters. numberOfAttempts(int), timout(int), and loggedIn(bool). NumberOfAttempts is how many additional attempts will be made if a post results in a 429 error, "Too Many Requests." It will stop attempting once a post is successful. Timeout is how many milliseconds the application will wait before attempting again. NumberOfAttempts and timout are both set to 0 by default. <br> loggedIn is a boolean that indicates whether the user is logged in or not. If loggedIn is set to true, the client will use the credentials from the session. If loggedIn is set to false, the client will set the Authorization header to null and it will skip the authentication step. Use this for public facing forms where the user is not logged in. The desired actions must be added to the EOTI role for that table for this to work. The value defaults to true, so it will attempt to use the credentials from the session by default. If the user is not logged in, and EOTI has permissions for the action, it will still work, but there will be a failed authentication step which will result in an error and is a little slower.
 ```javascript
-const client_object = new client(user_token, realm_url, numberOfAttempts, timeout)
+const client_object = new client(user_token, realm_url, numberOfAttempts, timeout, loggedIn)
 ```
 ### Client Object Example:
 ```javascript
-const client_object = new client("dyym73_iiu7_9_2ywlpz9s425us1l09qf2ubjpee", "myrealm.quickbase.com", 3, 1000)
+const client_object = new client("dyym73_iiu7_9_2ywlpz9s425us1l09qf2ubjpee", "myrealm.quickbase.com", 3, 1000, false)
 ```
-This would create a client object with the given user token and realm, would make 3 additional attempts if it gets a 429 error (and stop attempting once it gets a 200 success) and wait 1000 milliseconds (1 second) between attempts.
+This would create a client object with the given user token and realm, would make 3 additional attempts if it gets a 429 error (and stop attempting once it gets a 200 success) and wait 1000 milliseconds (1 second) between attempts. It would skip the authentication step and set the Authorization header to null, allowing it to be used in a public facing form where the user is not logged in.
+
+### Best Practice for Client initialization for public facing forms:
+```javascript
+const client_object = new client(null, null, 0, 0, false)
+```
+
+This works because it will still detect the realm from the URL and will not attempt to authenticate. It will still use the EOTI role for the table to determine what actions are allowed.
 
 
 

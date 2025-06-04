@@ -9,13 +9,14 @@
 //timeout: How long you want to wait in milliseconds between attempts if Quickbase returns a 429 code (too many requests) (integer)
 
 class client {
-    constructor(userToken=null, realm=null, numberOfAttempts=0, timeout=0) {
+    constructor(userToken=null, realm=null, numberOfAttempts=0, timeout=0, loggedIn=true) {
 
 
         this.userToken = userToken
         this.realm = realm
         this.numberOfAttempts = numberOfAttempts
         this.timeout = timeout
+        this.loggedIn = loggedIn
 
         if(realm === null){
             // get the domain from the url
@@ -467,17 +468,22 @@ class client {
     }
 
     async getHeaders(table_id){
-
         console.log("getting headers...")
         console.log("this realm: ", this.realm)
-        let headers = {
+        let headers = null
+        if(this.loggedIn){
+        headers = {
             'QB-Realm-Hostname': this.realm,
             'Authorization': await this.getAuthorization(table_id),
             'Content-Type': 'application/json'
+        }}else{
+            headers = {
+                'QB-Realm-Hostname': this.realm,
+                'Authorization': null,
+                'Content-Type': 'application/json'
+            }
         }
-
         console.log("headers: ", headers)
-
         return headers
     }
 
